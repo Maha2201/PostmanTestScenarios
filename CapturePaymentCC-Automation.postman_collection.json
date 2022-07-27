@@ -1,0 +1,746 @@
+{
+	"info": {
+		"_postman_id": "ae1630c9-83c3-4cab-a60e-9f59e6d5138e",
+		"name": "CapturePaymentCC-Automation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16252145"
+	},
+	"item": [
+		{
+			"name": "Oauth - Account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"pm.environment.set(\"account_token\", jsonData[\"access_token\"]);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{fluentApiHost}}/oauth/token?username={{fluentUserName}}&password={{fluentPassword}}&client_id={{fluentAccountId}}&client_secret={{fluentClientSecret}}&grant_type=password&scope=api",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"oauth",
+						"token"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{fluentUserName}}"
+						},
+						{
+							"key": "password",
+							"value": "{{fluentPassword}}"
+						},
+						{
+							"key": "client_id",
+							"value": "{{fluentAccountId}}"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{fluentClientSecret}}"
+						},
+						{
+							"key": "grant_type",
+							"value": "password"
+						},
+						{
+							"key": "scope",
+							"value": "api"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Oauth - Retailer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"pm.environment.set(\"retailer_token\", jsonData[\"access_token\"]);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{fluentApiHost}}/oauth/token?username={{retailer_username}}&password={{retailer_password}}&client_id={{fluentAccountId}}&client_secret={{fluentClientSecret}}&grant_type=password&scope=api",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"oauth",
+						"token"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{retailer_username}}"
+						},
+						{
+							"key": "password",
+							"value": "{{retailer_password}}"
+						},
+						{
+							"key": "client_id",
+							"value": "{{fluentAccountId}}"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{fluentClientSecret}}"
+						},
+						{
+							"key": "grant_type",
+							"value": "password"
+						},
+						{
+							"key": "scope",
+							"value": "api"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CREATE HD ORDER",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"last_order_id\", jsonData['data']['createOrder']['id']);",
+							"postman.setEnvironmentVariable(\"last_order_ref\", jsonData['data']['createOrder']['ref']);",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"setTimeout(function(){}, 7000);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "bearer {{retailer_token}}"
+					},
+					{
+						"key": "fluent.account",
+						"type": "text",
+						"value": "{{fluentAccountId}}"
+					}
+				],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation CreateOrder ($retailerId:ID!,\n$productCatalogueRef:String!,\n$productRef:String!,\n$ref:String!,\n$customerId:ID!) {\ncreateOrder(input: {\nref: \"CO111_CC_{{$randomInt}}\",\nretailer: { id:$retailerId },\ntype: \"HD\",\ncustomer: { id:$customerId },\nattributes : [\n{\nname: \"oneGCPackInsertPDFName\",\ntype: \"String\",\nvalue: \"I1_FR_PNHYBZ_PGC_WI1FR00198000_20200312114130.pdf\"\n},\n{\nname: \"oneGCPackInsertPDFPath\",\ntype: \"String\",\nvalue: \"INT/export_to_biztalk/giftcardpackage\"\n},\n{\nname: \"oneTaxPercentage\"\ntype: \"String\"\nvalue: \"10\"\n},\n{\nname: \"oneShippingTaxPercentage\"\ntype: \"String\"\nvalue: \"10\"\n},\n{\nname: \"oneNewTaxPercentage\"\ntype: \"String\"\nvalue: \"15\"\n},\n{\nname: \"oneNewShippingTaxPercentage\"\ntype: \"String\"\nvalue: \"15\"\n},\n{\nname: \"oneTaxStartDate\"\ntype: \"String\"\nvalue: \"28-04-2021\"\n},\n\n{\nname: \"oneGCReceiverEmail\",\ntype: \"String\",\nvalue: \"binureceiver@gmail.com\"\n},\n\n{\nname: \"onePreferredLanguage\"\ntype: \"String\"\nvalue: \"fr\"\n},\n{\nname: \"onePendingAntiFraud\"\ntype: \"String\"\nvalue: \"true\"\n},\n\n{\nname: \"oneGiftMessageContent\"\ntype: \"String\"\nvalue: \"Test Gift message\"\n},\n{\nname: \"oneGiftMessagePDFName\"\ntype: \"String\"\nvalue: \"Test Gift message pdf name\"\n},\n{\nname: \"oneShippingAmountExcludingTaxes\"\ntype: \"String\"\nvalue: \"2\"\n},\n{\nname: \"oneShippingTax\"\ntype: \"String\"\nvalue: \"5.0\"\n}\n{\nname: \"oneBeginHour\"\ntype: \"String\"\nvalue: \"10:00:00\"\n}, {\nname: \"oneDeliveryLandPhone\"\ntype: \"String\"\nvalue: \"+33 99 99 99 99 99\"\n}, {\nname: \"oneDeliveryMobilePhone\"\ntype: \"String\"\nvalue: \"+33 99 99 99 99 99\"\n},\n{\nname: \"oneBillingAddressName\"\ntype: \"String\"\nvalue: \"Mr BINU AUGUSTINE\"\n},\n{\nname: \"oneBillingAddressStreet\"\ntype: \"String\"\nvalue: \"Koottickal street\"\n},\n{\nname: \"oneBillingAddressCity\"\ntype: \"String\"\nvalue: \"Koottickal city\"\n},\n{\nname: \"oneBillingAddressRegion\"\ntype: \"String\"\nvalue: \"Kottayam Reg\"\n},\n{\nname: \"oneBillingAddressPostalCode\"\ntype: \"String\"\nvalue: \"686514\"\n}\n\n\n],\ntotalPrice:38.5,\nitems: [{\nref: $ref,\nproductRef: $productRef,\nproductCatalogueRef:$productCatalogueRef,\npaidPrice:33.00,\ntotalPrice:33.00,\ntotalTaxPrice:3.00,\nquantity:1,\ncurrency:\"EUR\",\ntaxPrice:3.00\nattributes: [\n\n{\nname: \"oneEntryNumber\"\ntype: \"Integer\"\nvalue: \"1\"\n},\n{\nname: \"oneBeginHour\"\ntype: \"String\"\nvalue: \"10:00:00\"\n}, {\nname:\"oneProductType\",\ntype:\"STRING\",\nvalue:\"STANDARD\"\n},\n,\n{\nname:\"unitPrice\"\ntype:\"String\"\nvalue:\"33.0\"\n},\n{\nname:\"totalAmountExcludingTaxes\"\ntype:\"String\"\nvalue:\"62.0\"\n},\n\n{\nname:\"oneProductNameDefaultLanguage\"\ntype:\"String\"\nvalue:\"product name test prod 1\"\n},\n{\nname:\"oneProductDescriptionDefaultLanguage\"\ntype:\"String\"\nvalue:\"product description test\"\n}\n\n]\n}\n\n\n\n\n\n\n],\nfulfilmentChoice: {\ncurrency: \"EUR\"\ndeliveryType: \"STANDARD\"\nfulfilmentPrice:5.5\nfulfilmentTaxPrice :0.5\npickupLocationRef:\"KR9612\"\nfulfilmentType:\"HD_PFDC\"\ndeliveryAddress: {\nref:\"binu@fluentcommerce.co\"\ncompanyName: \"ayatanew\"\nname: \"Test home\"\npostcode: \"75001\"\nlatitude: 49.353501\nlongitude: 2.763147\ncity:\"Stockholm\"\ncountry:\"JP\"\nstate:\"Stockholm\"\nstreet:\"Street 2B\"\n}\n}\n}) {\nid\nref\nitems{\nedges{\nnode{\nref\nattributes{\nname\n}\n}\n}\n}\n}\n}",
+						"variables": "{\n\t\"retailerId\": {{retailer_id}},\n\t\"productCatalogueRef\": \"DEFAULT:1\",\n\t\"productRef\": \"3145891626001\",\n\t\"ref\": \"3145891626001\",\n\t\"customerId\": 100\n}"
+					}
+				},
+				"url": {
+					"raw": "{{fluentApiHost}}/graphql",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET ORDER",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"last_fulfilment_id\", jsonData['data']['order']['fulfilments']['fulfilmentEdges'][0]['fulfilmentNode']['id']);",
+							"",
+							"postman.setEnvironmentVariable(\"productRef\", jsonData['data']['order']['fulfilments']['fulfilmentEdges'][0]['fulfilmentNode']['fulfilmentItems']",
+							"['fulfilmentItemEdges'][0]['fulfilmentItemNode']['ref']",
+							");",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"setTimeout(function(){}, 3000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "bearer {{retailer_token}}"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query getOrderById($id: ID!, $includeCustomer: Boolean!, $includeAttributes: Boolean!, $includeFulfilmentChoice: Boolean!, $includeFulfilments: Boolean!, $includeOrderItems: Boolean!, $includeArticles: Boolean!, $includeConsignmentArticles: Boolean!, $includeFinancialTransactions: Boolean!, $articleCount: Int, $articleCursor: String, $fulfilmentItemCount: Int, $fulfilmentItemCursor: String, $fulfilmentCount: Int, $fulfilmentCursor: String, $orderItemCount: Int, $orderItemCursor: String, $financialTransactionsCount: Int, $financialTransactionsCursor: String, $consignmentArticlesCount: Int, $consignmentArticlesCursor: String) {\n        order: orderById(id: $id) {\n          __typename\n          customer{__typename id ref title firstName primaryEmail}\n          __typename\n          id\n          ref\n          type\n          status\n          createdOn\n          updatedOn\n          totalPrice\n          totalTaxPrice\n          attributes@include(if: $includeAttributes) {\n            __typename\n            name\n            value\n            type\n          }\n          financialTransactions(first: $financialTransactionsCount, after: $financialTransactionsCursor) @include(if: $includeFinancialTransactions) {\n            __typename\n            edges {\n              __typename\n              node {\n                __typename\n                id\n                ref\n                type\n                status\n                createdOn\n                updatedOn\n                total\n                currency\n                externalTransactionCode\n                externalTransactionId\n                cardType\n                paymentMethod\n                paymentProviderName\n              }\n              cursor\n            }\n            pageInfo {\n              __typename\n              hasNextPage\n            }\n          }\n          items(first: $orderItemCount, after: $orderItemCursor) @include(if: $includeOrderItems) {\n            __typename\n            itemEdges: edges {\n              __typename\n              itemNode: node {\n                __typename\n                status\n                id\n                ref\n                quantity\n                paidPrice\n                currency\n                price\n                taxPrice\n                totalPrice\n                totalTaxPrice\n                status\n                product {\n                  __typename\n                  ... on VariantProduct {\n                    ref\n                    name\n                    summary\n                    catalogue {\n                      __typename\n                      ref\n                    }\n                  }\n                }\n                attributes {\n                  __typename\n                  name\n                  type\n                  value\n                }\n              }\n              cursor\n            }\n            pageInfo {\n              __typename\n              hasNextPage\n            }\n          }\n          fulfilments(first: $fulfilmentCount, after: $fulfilmentCursor) @include(if: $includeFulfilments) {\n            __typename\n            fulfilmentEdges: edges {\n              __typename\n              fulfilmentNode: node {\n                __typename\n                id\n                ref\n                type\n                status\n                type\n                createdOn\n                updatedOn\n                fromAddress {\n                  __typename\n                  ref\n                  id\n                  name\n                }\n                toAddress {\n                  __typename\n                  ref\n                  id\n                }\n                attributes {\n                  __typename\n                  name\n                  type\n                  value\n                }\n                fulfilmentItems: items(first: $fulfilmentItemCount, after: $fulfilmentItemCursor) {\n                  __typename\n                  fulfilmentItemEdges: edges {\n                    __typename\n                    fulfilmentItemNode: node {\n                      __typename\n                      id\n                      ref\n                      status\n                      requestedQuantity\n                      filledQuantity\n                      rejectedQuantity\n                      orderItem {\n                        __typename\n                        id\n                        ref\n                        status\n                        quantity\n                        paidPrice\n                        currency\n                        price\n                        taxPrice\n                        taxType\n                        totalPrice\n                        totalTaxPrice\n                        attributes {\n                          __typename\n                          name\n                          type\n                          value\n                        }\n                        product {\n                          __typename\n                          ... on VariantProduct {\n                            name\n                            ref\n                            gtin\n                            summary\n                            type\n                            prices {\n                              __typename\n                              value\n                            }\n                            catalogue {\n                              __typename\n                              id\n                              ref\n                            }\n                          }\n                        }\n                      }\n                    }\n                    cursor\n                  }\n                  pageInfo {\n                    __typename\n                    hasNextPage\n                  }\n                }\n                articles(first: $articleCount, after: $articleCursor) @include(if: $includeArticles) {\n                  __typename\n                  edges {\n                    __typename\n                    node {\n                      __typename\n                      id\n                      ref\n                      type\n                      status\n                      quantity\n                      carrierConsignmentArticles(first: $consignmentArticlesCount, after: $consignmentArticlesCursor) @include(if: $includeConsignmentArticles) {\n                        __typename\n                        edges {\n                          __typename\n                          node {\n                            __typename\n                            carrierConsignment {\n                              __typename\n                              id\n                              ref\n                              trackingLabel\n                              labelUrl\n                              orderSummaryUrl\n                              carrier {\n                                __typename\n                                id\n                                name\n                                ref\n                              }\n                            }\n                          }\n                        }\n                      }\n                    }\n                    cursor\n                  }\n                  pageInfo {\n                    __typename\n                    hasNextPage\n                  }\n                }\n              }\n              cursor\n            }\n            pageInfo {\n              __typename\n              hasNextPage\n            }\n          }\n          customer @include(if: $includeCustomer) {\n            __typename\n            ref\n            title\n            country\n            firstName\n            lastName\n            username\n            primaryEmail\n            primaryPhone\n          }\n          fulfilmentChoice @include(if: $includeFulfilmentChoice) {\n            __typename\n            id\n            createdOn\n            updatedOn\n            currency\n            deliveryInstruction\n            fulfilmentPrice\n            deliveryType\n            fulfilmentPrice\n            fulfilmentType\n            fulfilmentTaxPrice\n            pickupLocationRef\n            deliveryAddress {\n              __typename\n              id\n              type\n              companyName\n              name\n              street\n              city\n              state\n              postcode\n              region\n              country\n              region\n              ref\n              latitude\n              longitude\n            }\n          }\n        }\n      }",
+						"variables": "{\n  \"id\":{{last_order_id}},\n  \"includeCustomer\": false,\n  \"includeArticles\": false,\n  \"includeAttributes\": true,\n  \"includeFulfilments\": true,\n  \"includeFulfilmentChoice\": true,\n  \"includeConsignmentArticles\": false,\n  \"includeFinancialTransactions\": true,\n  \"includeOrderItems\": true\n}"
+					}
+				},
+				"url": {
+					"raw": "{{fluentApiHost}}/graphql",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PAYMENT: FINTXN AUTHORIZE",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"setTimeout(function(){}, 7000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "bearer {{retailer_token}}"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"entitySubtype\": \"HD\",\n    \"retailerId\": \"{{retailer_id}}\",\n    \"name\": \"New Financial Transaction\",\n    \"entityType\": \"ORDER\",\n    \"entityId\": \"{{last_order_id}}\",\n    \"attributes\": {\n        \"amount\": \"38.5\",\n        \"cardType\": \"VISA\",\n        \"currency\": \"HKD\",\n        \"paymentMethod\": \"Amex\",\n        \"paymentProvider\": \"ADYEN\",\n        \"transactionCode\": \"JDD6LKT8MBLZNN84\",\n        \"transactionRef\": \"\",\n        \"transactionType\": \"PAYMENT\",\n        \"updatedOn\": \"2018-01-15T01:27:18.000Z\",\n        \"paymentStatus\": \"AUTHORIZED\",\n        \"onePaymentSequenceNumber\":1,\n        \"onePendingAntiFraud\": false\n    }\n}"
+				},
+				"url": {
+					"raw": "{{fluentApiHost}}/api/v4.1/event/sync",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"api",
+						"v4.1",
+						"event",
+						"sync"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ACK_SUCCESS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"setTimeout(function(){}, 7000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "bearer {{retailer_token}}"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"ACK_SUCCESS\",\n    \"retailerId\": \"{{retailer_id}}\",\n    \"entityId\":\"{{last_fulfilment_id}}\",\n    \"entityType\": \"FULFILMENT\",\n    \"attributes\": {\n        \"erpExternalOrderID\": \"2119003775\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{fluentApiHost}}/api/v4.1/event/sync",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"api",
+						"v4.1",
+						"event",
+						"sync"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PICK",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"setTimeout(function(){}, 7000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "bearer {{retailer_token}}"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"name\":\"PICK\",\n   \"retailerId\":\"{{retailer_id}}\",\n   \"entityId\":\"{{last_fulfilment_id}}\",\n   \"entityType\":\"FULFILMENT\",\n   \"attributes\":{\n      \"refMapping\":{\n         \"items\":[\n            {\n               \"erpLineNumber\":\"1\",\n               \"fulfilmentItemId\":\"{{last_fulfilment_id}}\"\n            }\n         ]\n      },\n      \"fulfilmentItems\":[\n         {\n            \"skuRef\":\"{{productRef}}\",\n            \"availableQty\":\"10000\"\n         }\n      ],\n      \"articles\":[\n         {\n            \"ref\":\"{{$randomInt}}:{{retailer_id}}:{{$randomInt}}\"\n         }\n      ]\n   }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{fluentApiHost}}/api/v4.1/event/sync",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"api",
+						"v4.1",
+						"event",
+						"sync"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get ARTICLE By Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = JSON.parse(responseBody);\r",
+							"postman.setEnvironmentVariable(\"last_article_ref\", jsonData['data']['fulfilment']['articles']['edges'][0]['node']['ref']);\r",
+							"setTimeout(function(){}, 3000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "bearer {{retailer_token}}"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetArticlesOfFulfilment($id :ID!){\r\n    fulfilment : fulfilmentById(id:$id){\r\n        articles{\r\n            edges{\r\n                node{\r\n                    id\r\n                    ref\r\n                }\r\n            }\r\n        }\r\n\r\n    }\r\n}",
+						"variables": "{\r\n    \"id\":{{last_fulfilment_id}}\r\n}"
+					}
+				},
+				"url": {
+					"raw": "{{fluentApiHost}}/graphql",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Response_200",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{retailer_token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"CreateUpdateAVP\",\r\n  \"accountId\": \"{{fluentAccountId}}}\",\r\n  \"retailerId\": \"{{retailer_id}}\",\r\n  \"entityId\": \"79be1239-c938-4701-acbd-ba7a7c276f60\",\r\n  \"entityRef\": \"ATS_HD\",\r\n  \"entityType\": \"VIRTUAL_CATALOGUE\",\r\n  \"entitySubtype\": \"ATS_HD\",\r\n  \"rootEntityType\": \"VIRTUAL_CATALOGUE\",\r\n  \"rootEntityId\": \"79be1239-c938-4701-acbd-ba7a7c276f60\",\r\n  \"rootEntityRef\": \"ATS_HD\",\r\n  \"attributes\": {\r\n    \"rootEntityRef\": \"ATS_HD\",\r\n    \"ref\": \"SKU_1:LOC_1:DEFAULT\",\r\n    \"rootEntityId\": \"79be1239-c938-4701-acbd-ba7a7c276f60\",\r\n    \"inventoryCatalogueRef\": \"DEFAULT:1\",\r\n    \"rootEntityType\": \"VIRTUAL_CATALOGUE\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{fluentApiHost}}/api/v4.1/event/sync",
+							"host": [
+								"{{fluentApiHost}}"
+							],
+							"path": [
+								"api",
+								"v4.1",
+								"event",
+								"sync"
+							]
+						}
+					},
+					"code": 200,
+					"_postman_previewlanguage": "Text",
+					"header": [],
+					"cookie": [],
+					"body": ""
+				}
+			]
+		},
+		{
+			"name": "PACK",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"setTimeout(function(){}, 7000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "bearer {{retailer_token}}"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"PACK\",\n    \"retailerId\": \"{{retailer_id}}\",\n    \"entityId\": \"{{last_fulfilment_id}}\",\n    \"entityType\": \"FULFILMENT\",\n    \"attributes\": {\n        \"articles\": [\n            {\n                \"ref\": \"{{last_article_ref}}\",\n                \"parcels\":[\n                            {\n                                \"Parcel1\":\n                                {\n                                    \"box_type\":\"custom -1\",\n                                    \"dimension\":{\n                                        \"width\":10,\n                                        \"height\":10,\n                                        \"depth\":10,\n                                        \"unit\":\"cm\"\n                                    },\n                                    \"items\":[\n                                        {\n                                            \"description\":\"Food Bar\",\n                                            \"quantity\":1,\n                                            \"price\":{\n                                            \"currency\":\"USD\",\n                                            \"amount\":100\n                                            },\n                                            \"item_id\":\"1234567\",\n                                            \"origin_country\":\"CHN\",\n                                            \"weight\":{\n                                            \"unit\":\"kg\",\n                                            \"value\":1\n                                            },\n                                            \"sku\":\"imac2014\",\n                                            \"hs_code\":\"1006.30\"\n                                        }\n                                    ],\n                                    \"description\":\"Food XS\",\n                                    \"weight\":{\n                                        \"unit\":\"kg\",\n                                        \"value\":1\n                                    }\n                                }\n                            },\n                            {\n                                \"Parcel2\":\n                                {\n                                    \"box_type\":\"custom -2\",\n                                    \"dimension\":{\n                                        \"width\":10,\n                                        \"height\":10,\n                                        \"depth\":10,\n                                        \"unit\":\"cm\"\n                                    },\n                                    \"items\":[\n                                        {\n                                            \"description\":\"Food Bar\",\n                                            \"quantity\":1,\n                                            \"price\":{\n                                            \"currency\":\"USD\",\n                                            \"amount\":100\n                                            },\n                                            \"item_id\":\"1234567\",\n                                            \"origin_country\":\"CHN\",\n                                            \"weight\":{\n                                            \"unit\":\"kg\",\n                                            \"value\":1\n                                            },\n                                            \"sku\":\"imac2014\",\n                                            \"hs_code\":\"1006.30\"\n                                        }\n                                    ],\n                                    \"description\":\"Food XS\",\n                                    \"weight\":{\n                                        \"unit\":\"kg\",\n                                        \"value\":1\n                                    }\n                                }\n                            }\n                ]\n            }\n        ],\n        \"fulfilmentItems\": [\n            {\n                \"skuRef\": \"{{productRef}}\",\n                \"availableQty\": \"10000\"\n            }\n        ],\n        \"oneGCNumber\": \"678912349067778819034567819\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{fluentApiHost}}/api/v4.1/event/sync",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"api",
+						"v4.1",
+						"event",
+						"sync"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET INVOICE",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData1 = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"last_invoice_ref\", jsonData1['data']['invoices']['edges'][0]['node']['ref']);",
+							"",
+							"",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "bearer {{retailer_token}}"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query {\r\n  invoices {\r\n    edges{\r\n      node {\t\r\n          id\r\n          ref\r\n          type\r\n          status\r\n        items{\r\n          edges{\r\n            node{\r\n              ref\r\n              product{\r\n                ref\r\n              }\r\n              unitQuantity{\r\n                quantity\r\n              }\r\n              unitAmount{\r\n                amount\r\n              }\r\n            }\r\n          }\r\n        }\r\n      order{\r\n        ref\r\n        retailer{\r\n          id\r\n        }\r\n      }\r\n        attributes{\r\n          name\r\n          value\r\n        }\r\n        subTotalAmount{\r\n          amount\r\n        }\r\n        totalTax{\r\n          amount\r\n        }\r\n        totalAmount{\r\n          amount\r\n        }\r\n        totalBalance{\r\n          amount\r\n        }\r\n \r\n       \r\n      }\r\n    }  \r\n  }\r\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{fluentApiHost}}/graphql",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Response_200",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{retailer_token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"CreateUpdateAVP\",\r\n  \"accountId\": \"{{fluentAccountId}}}\",\r\n  \"retailerId\": \"{{retailer_id}}\",\r\n  \"entityId\": \"79be1239-c938-4701-acbd-ba7a7c276f60\",\r\n  \"entityRef\": \"ATS_HD\",\r\n  \"entityType\": \"VIRTUAL_CATALOGUE\",\r\n  \"entitySubtype\": \"ATS_HD\",\r\n  \"rootEntityType\": \"VIRTUAL_CATALOGUE\",\r\n  \"rootEntityId\": \"79be1239-c938-4701-acbd-ba7a7c276f60\",\r\n  \"rootEntityRef\": \"ATS_HD\",\r\n  \"attributes\": {\r\n    \"rootEntityRef\": \"ATS_HD\",\r\n    \"ref\": \"SKU_1:LOC_1:DEFAULT\",\r\n    \"rootEntityId\": \"79be1239-c938-4701-acbd-ba7a7c276f60\",\r\n    \"inventoryCatalogueRef\": \"DEFAULT:1\",\r\n    \"rootEntityType\": \"VIRTUAL_CATALOGUE\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{fluentApiHost}}/api/v4.1/event/sync",
+							"host": [
+								"{{fluentApiHost}}"
+							],
+							"path": [
+								"api",
+								"v4.1",
+								"event",
+								"sync"
+							]
+						}
+					},
+					"code": 200,
+					"_postman_previewlanguage": "Text",
+					"header": [],
+					"cookie": [],
+					"body": ""
+				}
+			]
+		},
+		{
+			"name": "PAYMENT:  FINANCIAL TRANSACTION CAPTURED",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"setTimeout(function(){}, 7000);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "bearer {{retailer_token}}"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"entitySubtype\": \"HD\",\n    \"retailerId\": \"{{retailer_id}}\",\n    \"name\": \"New Financial Transaction\",\n    \"entityType\": \"ORDER\",\n    \"entityId\": \"{{last_order_id}}\",\n    \"attributes\": {\n        \"amount\": \"38.5\",\n        \"cardType\": \"VISA\",\n        \"currency\": \"HKD\",\n        \"paymentMethod\": \"Amex\",\n        \"paymentProvider\": \"ADYEN\",\n        \"transactionCode\": \"JDD6LKT8MBLZNN84\",\n        \"transactionRef\": \"2424524533\",\n        \"transactionType\": \"PAYMENT\",\n        \"updatedOn\": \"2018-01-15T01:27:18.000Z\",\n        \"paymentStatus\": \"CAPTURED\",\n        \"onePaymentSequenceNumber\":1,\n        \"onePendingAntiFraud\": false\n    }\n}"
+				},
+				"url": {
+					"raw": "{{fluentApiHost}}/api/v4.1/event/sync",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"api",
+						"v4.1",
+						"event",
+						"sync"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "LABEL_GENERATE Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "bearer {{retailer_token}}"
+					},
+					{
+						"key": "Accept",
+						"value": "*/*"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"LABEL_GENERATE\",\n    \"retailerId\": \"{{retailer_id}}\",\n    \"entityId\": \"{{last_fulfilment_id}}\",\n    \"entityType\": \"FULFILMENT\",\n    \"attributes\": {\n        \"labelUrl\":\"https://sandbox-download.postmen.com/label/2015-11-27/1441785264309885.pdf\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{fluentApiHost}}/api/v4.1/event/sync",
+					"host": [
+						"{{fluentApiHost}}"
+					],
+					"path": [
+						"api",
+						"v4.1",
+						"event",
+						"sync"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Response_200",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "bearer {{retailer_token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"CreateUpdateAVP\",\r\n  \"accountId\": \"{{fluentAccountId}}}\",\r\n  \"retailerId\": \"{{retailer_id}}\",\r\n  \"entityId\": \"79be1239-c938-4701-acbd-ba7a7c276f60\",\r\n  \"entityRef\": \"ATS_HD\",\r\n  \"entityType\": \"VIRTUAL_CATALOGUE\",\r\n  \"entitySubtype\": \"ATS_HD\",\r\n  \"rootEntityType\": \"VIRTUAL_CATALOGUE\",\r\n  \"rootEntityId\": \"79be1239-c938-4701-acbd-ba7a7c276f60\",\r\n  \"rootEntityRef\": \"ATS_HD\",\r\n  \"attributes\": {\r\n    \"rootEntityRef\": \"ATS_HD\",\r\n    \"ref\": \"SKU_1:LOC_1:DEFAULT\",\r\n    \"rootEntityId\": \"79be1239-c938-4701-acbd-ba7a7c276f60\",\r\n    \"inventoryCatalogueRef\": \"DEFAULT:1\",\r\n    \"rootEntityType\": \"VIRTUAL_CATALOGUE\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "{{fluentApiHost}}/api/v4.1/event/sync",
+							"host": [
+								"{{fluentApiHost}}"
+							],
+							"path": [
+								"api",
+								"v4.1",
+								"event",
+								"sync"
+							]
+						}
+					},
+					"code": 200,
+					"_postman_previewlanguage": "Text",
+					"header": [],
+					"cookie": [],
+					"body": ""
+				}
+			]
+		}
+	]
+}
